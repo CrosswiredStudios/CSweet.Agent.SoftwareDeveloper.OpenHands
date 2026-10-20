@@ -14,6 +14,9 @@ has been made.
   lacked the installer's exact bundle checksum sidecar. Historical release assets were preserved.
   Release 0.1.1 added that sidecar; normal update downloaded, verified and sealed the prebuilt release
   on attempt one. No approved package records, artifact digests or installed payloads were patched.
+- Maintenance release 0.1.2 published all three packages and the verified Linux bundle with its exact
+  checksum sidecar. All 234 agent tests passed locally and in CI, including operational startup/exit
+  regression tests. The independent package consumer and agent self-test passed.
 - OpenHands Developer 0.1.1 was hired through the normal catalog review with Local vLLM qwen3.8-27b,
   256,000 context tokens and 128,000 maximum output tokens. Its reviewed public internet grant is Allowed.
 
@@ -36,6 +39,21 @@ project, verified assignment and started the intake. The Compute page then repor
 permission is needed” and “Waiting agents remain queued until Linux preparation recovers.” No manual
 Python configuration or Office image modification has been performed.
 
+## Directed discussion and review feedback
+
+Two owner-directed requests on initiative `PD8784BF648-1` produced two correlated agent replies,
+with four comments total after explicit refresh. Request identities were
+`f851852a-0c6f-42ec-9e95-43f7be82ddef` revision 1 and
+`f43cacf4-f76c-4ea2-ab72-6c2af83f3a9f` revision 1.
+
+The first reply proposed useful NFKD examples but incorrectly treated existing capability grants
+as proof of runtime readiness and limited combining-mark removal to U+0300–U+036F. Review feedback
+corrected both points and reiterated that comments cannot grant execution authority. The second
+reply explicitly retracted the readiness claim, acknowledged the administrator prerequisite, and
+changed the test plan to Unicode `\\p{M}` including a U+1AB0 case. Source work remained unclaimed.
+This verifies directed discussion and response to review feedback, not source implementation,
+source reviewer rework or manager-question governed resume.
+
 ## Acceptance and comparison
 
 Actual published-agent coding, Python bootstrap in the live VM, source publication/independent review,
@@ -45,6 +63,7 @@ Completion rate, review outcomes, intervention counts, duration and authoritativ
 yet available for a fair Daniel comparison. No performance advantage is claimed.
 
 Platform PR: https://github.com/CrosswiredStudios/C-Sweet/pull/11. Local isolated platform verification
-passed; its CI restore is independently blocked by the baseline pin to unpublished
+passed, including 91 protocol/schema/research/checkpoint cases and six approved-definition hiring
+cases; its CI restore is independently blocked by the baseline pin to unpublished
 `CSweet.Memory.Broker` 0.5.1 (NuGet currently supplies 0.5.0). Local verification packed the unchanged
 0.5.1 source without publishing or modifying it.
