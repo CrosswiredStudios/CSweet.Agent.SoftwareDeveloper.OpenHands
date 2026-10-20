@@ -23,6 +23,10 @@ has been made.
   behavior. Four additional tests cover denied-command feedback, absent validation receipts, bounded
   escalation, source preservation and permitted continuation, including actual pinned worker execution.
   This closes a workflow difference before any harness performance comparison.
+- Release 0.1.3 passed all 238 tests locally and in Linux/Python 3.12 CI, package verification,
+  independent consumer and self-test. Its normal targeted update installed the prebuilt bundle on
+  attempt one with download, digest verification and sealing complete (2026-10-20 01:16
+  America/Los_Angeles). This is the current installed OpenHands pilot version.
 - OpenHands Developer 0.1.1 was hired through the normal catalog review with Local vLLM qwen3.8-27b,
   256,000 context tokens and 128,000 maximum output tokens. Its reviewed public internet grant is Allowed.
 
@@ -68,6 +72,12 @@ test repair, reviewer rework, runtime recovery, manager-question/resume, deploym
 delegation still require live completion. Automated coverage is not substituted for these scenarios.
 Completion rate, review outcomes, intervention counts, duration and authoritative token usage are not
 yet available for a fair Daniel comparison. No performance advantage is claimed.
+
+The module-only live request explicitly excludes deployment. Existing platform
+`PersonalWorkPlanning.ValidateRequest` and shared `DevelopmentPlanningService.ValidateDraft` require
+a final validation/deployment pair for personal plans. The live evaluation must verify that this scope
+conflict becomes a manager decision rather than silently adding a deployment or Docker deliverable.
+No scope expansion or deployment has been approved or performed for the module request.
 
 Platform PR: https://github.com/CrosswiredStudios/C-Sweet/pull/11. Local isolated platform verification
 passed, including 91 protocol/schema/research/checkpoint cases and six approved-definition hiring
