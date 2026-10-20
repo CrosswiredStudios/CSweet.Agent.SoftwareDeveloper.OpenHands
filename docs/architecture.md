@@ -50,6 +50,11 @@ Reply control records this correlation through the existing authorized comment m
 discussion events. Edited/deleted questions, edited answers, changed managers, revoked availability,
 scope changes and unresolved decisions cannot trigger automatic stage retry.
 
+When a tool requests a wait, `OpenHandsExecutionEngine` acknowledges the completed tool observation's
+checkpoint before stopping at the following progress or action boundary. An unresolved pause blocks
+worker startup on duplicate callbacks. The real worker regression restores that observation after
+discarding its local runtime, without posting the question again.
+
 Research uses `PlatformResearchClient` and the platform's startup-managed SearXNG service.
 Page reading reuses public address, connection pinning and redirect policy checks. No paid search
 service or provider key is required. Existing model and infrastructure costs remain separate.

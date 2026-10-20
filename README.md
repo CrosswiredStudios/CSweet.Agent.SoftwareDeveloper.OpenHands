@@ -6,10 +6,10 @@ software work while C-Sweet owns tickets, grants, approvals, source publication 
 ## Contract
 
 - Agent ID: `com.csweet.software-developer.openhands`
-- Version: `0.1.5`
+- Version: `0.1.6`
 - Provides: `software-development.implement.v1`
 - Activation: OnDemand; one concurrent job; requires an assigned project.
-- Packages: `CSweet.Agent.Development`, `CSweet.Agent.OpenHands`, and `CSweet.Agent.SoftwareDeveloper.OpenHands`, each 0.1.5.
+- Packages: `CSweet.Agent.Development`, `CSweet.Agent.OpenHands`, and `CSweet.Agent.SoftwareDeveloper.OpenHands`, each 0.1.6.
 - Runtime: existing certified Linux development guest, .NET 10 and Python 3.12. OpenHands SDK/tools are pinned to 1.56.0.
 - Requested capabilities cover the implemented work, communication, repository, compute, research and private checkpoint workflows in the reviewed manifest. Declarations are not grants.
 - Network: reviewed public runtime egress for dependency setup; public page reading follows the separately reviewed web policy.

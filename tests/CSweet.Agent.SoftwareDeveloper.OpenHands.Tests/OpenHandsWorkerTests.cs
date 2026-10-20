@@ -118,6 +118,65 @@ public sealed class OpenHandsWorkerTests
         finally { if(Directory.Exists(root)) Directory.Delete(root,true); }
     }
 
+    [Fact]
+    public async Task ManagerWaitCheckpointsTheCompletedToolResultBeforePausingAndRestoresWithoutReposting()
+    {
+        var python = Environment.GetEnvironmentVariable("CSWEET_TEST_OPENHANDS_PYTHON")
+            ?? throw new InvalidOperationException("Set CSWEET_TEST_OPENHANDS_PYTHON to the pinned test environment.");
+        var root = Path.Combine(Path.GetTempPath(), "csweet-worker-wait-" + Guid.NewGuid().ToString("N"));
+        var source = Path.Combine(root, "source"); Directory.CreateDirectory(source);
+        ExecutionCheckpoint? checkpoint = null;
+        var paused = false; var posted = 0; var calls = 0; var savedAfterQuestion = false;
+        var runtime = new AgentTestRuntime()
+            .RegisterCapability<ExecutionCheckpointRead, ExecutionCheckpointReadResult>(ExecutionCheckpointCapabilities.Read,
+                (_, _) => Task.FromResult(new ExecutionCheckpointReadResult(checkpoint)))
+            .RegisterCapability<ExecutionCheckpointWrite, ExecutionCheckpoint>(ExecutionCheckpointCapabilities.Write, (input, _) =>
+            {
+                Assert.Equal(checkpoint?.Revision ?? 0, input.ExpectedRevision);
+                checkpoint = new(input.SessionKey, input.EngineVersion, input.ExpectedRevision + 1, input.EventCursor,
+                    input.EngineArchive, "digest", SourceArchive: input.SourceArchive);
+                if (posted == 1) savedAfterQuestion = true;
+                return Task.FromResult(checkpoint);
+            });
+        using var client = new ModelBridgeTests.ScriptedClient((messages, _) =>
+        {
+            if (++calls == 1)
+                return new(new ChatMessage(ChatRole.Assistant, [new FunctionCallContent("question", "request_ticket_response",
+                    new Dictionary<string, object?> { ["question"] = "Which existing behavior applies?" })]));
+            Assert.True(savedAfterQuestion);
+            Assert.Contains(messages.SelectMany(x => x.Contents).OfType<FunctionResultContent>(),
+                x => x.Result?.ToString()?.Contains("retained-question-identity", StringComparison.Ordinal) == true);
+            return new(new ChatMessage(ChatRole.Assistant, [new FunctionCallContent("finish", "finish",
+                new Dictionary<string, object?> { ["message"] = "Continued after the governed manager reply." })]));
+        });
+        var options = new ChatOptions { Tools = [AIFunctionFactory.Create((string question) =>
+        {
+            Assert.Equal("Which existing behavior applies?", question);
+            posted++; paused = true;
+            return new { status = "AwaitingReply", commentId = "retained-question-identity" };
+        }, "request_ticket_response")] };
+        var engine = new OpenHandsExecutionEngine(new(python, Path.Combine(root, "runtime"),
+            Path.Combine(RepositoryRoot(), "src/CSweet.Agent.OpenHands/worker")) { TestDiagnostics = Console.Error.WriteLine });
+        var request = new DevelopmentExecutionRequest("manager-wait", "Ask the manager and wait.", source,
+            runtime.CreateContext(), client, options, 8, 32000, 4000, () => paused);
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        try
+        {
+            Assert.Contains("Waiting", (await engine.ExecuteAsync(request, timeout.Token)).Text);
+            Assert.Equal(1, posted); Assert.Equal(1, calls); Assert.True(savedAfterQuestion);
+            // An unrelated duplicate callback while the wait is unresolved must not start a model turn.
+            await engine.ExecuteAsync(request, timeout.Token);
+            Assert.Equal(1, calls);
+            paused = false;
+            // Simulate loss of the disposable local worker runtime. Restoration must use the private archive.
+            Directory.Delete(Path.Combine(root, "runtime"), true);
+            var resumed = await engine.ExecuteAsync(request with { Prompt = "The governed manager answer is available; continue." }, timeout.Token);
+            Assert.Contains("governed manager reply", resumed.Text);
+            Assert.Equal(1, posted); Assert.Equal(2, calls);
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
     private static string RepositoryRoot()
     {
         var directory=new DirectoryInfo(AppContext.BaseDirectory);

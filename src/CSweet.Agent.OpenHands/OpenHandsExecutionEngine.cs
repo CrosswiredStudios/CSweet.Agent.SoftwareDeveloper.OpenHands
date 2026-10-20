@@ -24,6 +24,8 @@ public sealed class OpenHandsExecutionEngine(OpenHandsEngineOptions? options = n
 
     public async Task<DevelopmentExecutionResult> ExecuteAsync(DevelopmentExecutionRequest request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (request.ShouldPause?.Invoke() == true) return new("Waiting for the authorized ticket response.");
         var worker = _options.WorkerDirectory ?? Path.Combine(AppContext.BaseDirectory, "worker");
         var runtime = _options.RuntimeDirectory ?? "/run/csweet/workload/tools/openhands";
         var python = _options.PythonExecutable ?? await BootstrapAsync(worker, runtime, request.Context, cancellationToken);
@@ -78,7 +80,9 @@ public sealed class OpenHandsExecutionEngine(OpenHandsEngineOptions? options = n
                 var data = message.RootElement;
                 if (data.GetProperty("protocol").GetInt32() != 1) throw new InvalidDataException("Unsupported worker protocol.");
                 var kind = data.GetProperty("kind").GetString();
-                if (request.ShouldPause?.Invoke() == true)
+                // A tool can request a manager wait. Persist its observation before stopping
+                // at the following progress/gate boundary; no next action or inference may run.
+                if (kind != "checkpoint" && request.ShouldPause?.Invoke() == true)
                 {
                     await SendAsync(process, new { protocol = 1, ok = false, stop = true }, cancellationToken);
                     return new("Waiting for the authorized ticket response.");
