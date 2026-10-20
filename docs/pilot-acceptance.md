@@ -9,6 +9,7 @@ until released-package installation and the live scenarios below have retained e
 | Review, publication and restart recovery | `AssignedDevelopmentService`, `PersonalDevelopmentService` | ReviewDelivery, NoChangeRework, PlanCompletionRecovery tests |
 | Planning and personal delivery | `DevelopmentPlanningService`, `PersonalDevelopmentService` | StagedPlanning, PlanningExecution, deployment recovery tests |
 | Direct chat and project intake | `DevelopmentIntakeService`, `ProjectIntakeService` | ComputeChat and onboarding fixtures; live direct-chat journey required |
+| Personal-plan workboard activity | `ProjectTicketTools`, `PersonalDevelopmentService` | Typed receipt/idempotency, changed board, foreign/deleted target, revoked mutation and pagination tests; live ticket update required |
 | Directed discussion and manager escalation | `TicketDiscussionTools`, `Discussion`, `ManagerResponseRecovery`, `DevelopmentCoordinationService` | ManagerResponseRecovery tests; live manager/specialist round trip required |
 | Build readiness | `DeliveryScopeExecution` | BuildReadiness tests |
 | Progress and command deadlines | `WorkspaceProgress`, `BoundedWorkspaceShell` | WorkspaceShell tests; real worker tool test |

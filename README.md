@@ -6,10 +6,10 @@ software work while C-Sweet owns tickets, grants, approvals, source publication 
 ## Contract
 
 - Agent ID: `com.csweet.software-developer.openhands`
-- Version: `0.1.6`
+- Version: `0.1.7`
 - Provides: `software-development.implement.v1`
 - Activation: OnDemand; one concurrent job; requires an assigned project.
-- Packages: `CSweet.Agent.Development`, `CSweet.Agent.OpenHands`, and `CSweet.Agent.SoftwareDeveloper.OpenHands`, each 0.1.6.
+- Packages: `CSweet.Agent.Development`, `CSweet.Agent.OpenHands`, and `CSweet.Agent.SoftwareDeveloper.OpenHands`, each 0.1.7.
 - Runtime: existing certified Linux development guest, .NET 10 and Python 3.12. OpenHands SDK/tools are pinned to 1.56.0.
 - Requested capabilities cover the implemented work, communication, repository, compute, research and private checkpoint workflows in the reviewed manifest. Declarations are not grants.
 - Network: reviewed public runtime egress for dependency setup; public page reading follows the separately reviewed web policy.
@@ -22,6 +22,10 @@ Assigned ticket execution can ask a current human manager or authorized agent te
 clarification. A human uses the workboard's Reply control to bind an answer to the exact question
 revision. The adapter rechecks recipient availability, current management/assignment and unchanged
 scope before requesting a governed stage retry. Replies never approve work or expand grants.
+
+Personal-plan authoring also exposes typed ticket reads and factual comments confined to its current
+development board. Every target is re-read before use; comment receipts use stable workspace/content
+keys. Source notes cannot substitute for requested platform ticket updates.
 
 ## Develop
 

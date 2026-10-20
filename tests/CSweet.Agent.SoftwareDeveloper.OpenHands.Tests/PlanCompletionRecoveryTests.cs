@@ -59,6 +59,9 @@ public sealed partial class ComputeDeploymentRecoveryTests
         public Task<DevelopmentExecutionResult> ExecuteAsync(DevelopmentExecutionRequest request, CancellationToken token)
         {
             Calls++;
+            Assert.Contains(request.Options.Tools!, x => x.Name == "read_project_tickets");
+            Assert.Contains(request.Options.Tools!, x => x.Name == "read_work_ticket_comments");
+            Assert.Contains(request.Options.Tools!, x => x.Name == "post_work_ticket_comment");
             throw new OperationalDevelopmentException("openhands.runtime.failed: OpenHands stopped during execution (BadRequestError).");
         }
     }

@@ -43,6 +43,12 @@ governed retry, so interrupted retry responses do not repeat inference. Scope re
 remain explicit manager decisions. Discussion events are wake hints; bounded attention recovery
 handles missed notifications. Source publication still requires current-source validation receipts.
 
+`ProjectTicketTools` supplies personal-plan authoring with typed board reads and factual comment
+mutations. Its board and workspace are bound by `PersonalDevelopmentService`, not model arguments.
+It re-reads target membership before each operation; the platform separately enforces current read
+and comment grants. Comment keys bind workspace, ticket and normalized body. These activity tools
+cannot change work status, assignments, scope or approvals, and do not implement manager-wait resume.
+
 Questions retain either an agent installation identity or a human employee identity. Human answers
 must have `OrganizationUser` authorship and the exact question/revision correlation. Agent recipients
 are also re-read from the current available roster, including assigned specialists. The workboard
