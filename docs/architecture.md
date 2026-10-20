@@ -43,6 +43,13 @@ governed retry, so interrupted retry responses do not repeat inference. Scope re
 remain explicit manager decisions. Discussion events are wake hints; bounded attention recovery
 handles missed notifications. Source publication still requires current-source validation receipts.
 
+Questions retain either an agent installation identity or a human employee identity. Human answers
+must have `OrganizationUser` authorship and the exact question/revision correlation. Agent recipients
+are also re-read from the current available roster, including assigned specialists. The workboard
+Reply control records this correlation through the existing authorized comment mutation and durable
+discussion events. Edited/deleted questions, edited answers, changed managers, revoked availability,
+scope changes and unresolved decisions cannot trigger automatic stage retry.
+
 Research uses `PlatformResearchClient` and the platform's startup-managed SearXNG service.
 Page reading reuses public address, connection pinning and redirect policy checks. No paid search
 service or provider key is required. Existing model and infrastructure costs remain separate.

@@ -26,9 +26,15 @@ internal sealed class TicketDiscussionTools(Guid boardId, WorkItem item, Guid at
         var request = comments.SingleOrDefault(c => c.Kind == "discussion.request" &&
             c.AuthorKind == "AgentInstallation" && c.AuthorSubjectId.ToString() == context.InstallationId &&
             c.CausationId?.StartsWith(prefix, StringComparison.Ordinal) == true);
-        if (request is not null && Guid.TryParse(request.CausationId![prefix.Length..], out var recipient))
-            Pending = new(boardId, item.Id, request.Id, request.Revision, recipient)
-                { RequiresRevision = request.Body.Contains(Discussion.RevisionRequest, StringComparison.Ordinal) };
+        if (request is not null)
+        {
+            var identity = request.CausationId![prefix.Length..];
+            var human = identity.EndsWith(":human", StringComparison.Ordinal);
+            if (Guid.TryParse(human ? identity[..^6] : identity, out var recipient))
+                Pending = new(boardId, item.Id, request.Id, request.Revision, human ? Guid.Empty : recipient)
+                { RespondingEmployeeId = human ? recipient : null,
+                    RequiresRevision = request.Body.Contains(Discussion.RevisionRequest, StringComparison.Ordinal) };
+        }
     }
 
     internal DevelopmentEngineOptions Attach(DevelopmentEngineOptions options)
@@ -71,26 +77,31 @@ internal sealed class TicketDiscussionTools(Guid boardId, WorkItem item, Guid at
         if (string.IsNullOrWhiteSpace(question) || question.Length > 6000) throw new ArgumentException("A specific question of at most 6000 characters is required.");
         var roster = (await context.Platform.ReadTeamRosterAsync(new TeamRosterRequest(1, 100), token)).Team;
         var recipient = roster?.Members.SingleOrDefault(m => m.EmployeeId == recipientEmployeeId && m.IsAvailable);
-        if (recipient?.AgentInstallationId is not { } installation || recipient.EmployeeId == context.Identity?.EmployeeId)
-            throw new ArgumentException("Choose another available agent from the current team roster.");
+        if (recipient is null || recipient.EmployeeId == context.Identity?.EmployeeId ||
+            !Guid.TryParse(recipient.EmployeeId, out var employee) ||
+            recipient.AgentInstallationId is null && recipient.EmployeeType != "Human")
+            throw new ArgumentException("Choose another available human or agent from the current team roster.");
+        var installation = recipient.AgentInstallationId;
         var current = await context.Platform.Work.ReadItemAsync(new(boardId, item.Id), token);
         var board = await context.Platform.Work.ListBoardsAsync(cancellationToken: token);
         var revision = question.Contains(Discussion.RevisionRequest, StringComparison.Ordinal);
-        if (revision && !current.StageAssignments.Any(a => a.AgentInstallationId == installation &&
+        if (revision && !current.StageAssignments.Any(a => installation.HasValue && a.AgentInstallationId == installation &&
                 a.StageKey == "technical-review") &&
             board.SingleOrDefault(b => b.Id == boardId)?.ManagerOrganizationUserId.ToString() != recipient.EmployeeId)
             throw new ArgumentException("Task revisions go to the assigned technical reviewer or board manager.");
-        if (!current.StageAssignments.Any(a => a.AgentInstallationId == installation) &&
+        if (!current.StageAssignments.Any(a => installation.HasValue && a.AgentInstallationId == installation) &&
             current.AccountableOrganizationUserId?.ToString() != recipient.EmployeeId &&
             board.SingleOrDefault(b => b.Id == boardId)?.ManagerOrganizationUserId.ToString() != recipient.EmployeeId)
             throw new ArgumentException("The recipient must be a current ticket assignee, accountable owner or board manager.");
+        var recipientKey = installation is { } agent ? agent.ToString("D") : $"{employee:D}:human";
         var comment = await context.Platform.Work.CommentAsync(new(boardId, item.Id,
             $"@{recipient.DisplayName}: {question.Trim()}", $"discussion-request:{attemptId:N}")
-            { Kind = "discussion.request", CausationId = $"{attemptId:D}:{installation:D}" }, token);
-        if (comment.CausationId != $"{attemptId:D}:{installation:D}")
+            { Kind = "discussion.request", CausationId = $"{attemptId:D}:{recipientKey}" }, token);
+        if (comment.CausationId != $"{attemptId:D}:{recipientKey}")
             throw new InvalidOperationException("This attempt already requested a response from another teammate. Read the existing discussion.");
-        Pending = new(boardId, item.Id, comment.Id, comment.Revision, installation)
-            { RequiresRevision = comment.Body.Contains(Discussion.RevisionRequest, StringComparison.Ordinal) };
+        Pending = new(boardId, item.Id, comment.Id, comment.Revision, installation ?? Guid.Empty)
+            { RespondingEmployeeId = installation is null ? employee : null,
+                RequiresRevision = comment.Body.Contains(Discussion.RevisionRequest, StringComparison.Ordinal) };
         return new { status = "AwaitingReply", request = Pending, instruction = "Stop implementation now. Your workspace will be retained until the producer resumes this stage." };
     }
 }

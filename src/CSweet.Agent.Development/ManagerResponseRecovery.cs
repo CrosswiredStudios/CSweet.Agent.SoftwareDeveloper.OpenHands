@@ -55,8 +55,8 @@ internal static class ManagerResponseRecovery
             var question = thread.SingleOrDefault(x => x.Id == q.CommentId && x.Revision == q.CommentRevision);
             if (question is null || question.Kind!="discussion.request" || question.AuthorKind!="AgentInstallation" || question.AuthorSubjectId!=self)
             { remaining.Remove(wait); continue; }
-            var answer = thread.LastOrDefault(x => x.Kind == "discussion.reply" && x.AuthorKind == "AgentInstallation" &&
-                x.AuthorSubjectId == q.RespondingInstallationId && x.CausationId == Discussion.Correlation(q.CommentId, q.CommentRevision));
+            var answer = thread.LastOrDefault(x => x.Kind == "discussion.reply" && x.AuthorKind == q.AuthorKind &&
+                x.AuthorSubjectId == q.AuthorSubjectId && x.CausationId == Discussion.Correlation(q.CommentId, q.CommentRevision));
             if (answer is null) continue;
             if(!await RecipientAuthorizedAsync(item,q,context,token)) continue;
             if(wait.AnswerId!=answer.Id || wait.AnswerRevision!=answer.Revision)
@@ -99,10 +99,12 @@ internal static class ManagerResponseRecovery
     private static async Task<bool> RecipientAuthorizedAsync(WorkItem item, Discussion.ResponseWait question,
         AgentRuntimeContext context, CancellationToken token)
     {
-        if(item.StageAssignments.Any(x=>x.AgentInstallationId==question.RespondingInstallationId)) return true;
         var roster=(await context.Platform.ReadTeamRosterAsync(new TeamRosterRequest(1,100),token)).Team;
-        var recipient=roster?.Members.SingleOrDefault(x=>x.AgentInstallationId==question.RespondingInstallationId && x.IsAvailable);
+        var recipient=roster?.Members.SingleOrDefault(x=>x.IsAvailable && (question.RespondingInstallationId != Guid.Empty
+            ? x.AgentInstallationId==question.RespondingInstallationId
+            : x.EmployeeType=="Human" && x.AgentInstallationId is null && x.EmployeeId==question.RespondingEmployeeId?.ToString()));
         if(recipient is null) return false;
+        if(question.RespondingInstallationId != Guid.Empty && item.StageAssignments.Any(x=>x.AgentInstallationId==question.RespondingInstallationId)) return true;
         var board=await context.Platform.Work.ReadBoardAsync(question.BoardId,token);
         return recipient.EmployeeId==item.AccountableOrganizationUserId?.ToString() ||
             recipient.EmployeeId==board.Board.ManagerOrganizationUserId?.ToString();

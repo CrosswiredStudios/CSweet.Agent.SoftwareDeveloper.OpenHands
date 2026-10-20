@@ -17,6 +17,11 @@ internal static class Discussion
     internal sealed record ResponseWait(Guid BoardId, Guid ItemId, Guid CommentId, long CommentRevision, Guid RespondingInstallationId)
     {
         public bool RequiresRevision { get; init; }
+        public Guid? RespondingEmployeeId { get; init; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        internal string AuthorKind => RespondingInstallationId == Guid.Empty ? "OrganizationUser" : "AgentInstallation";
+        [System.Text.Json.Serialization.JsonIgnore]
+        internal Guid AuthorSubjectId => RespondingInstallationId == Guid.Empty ? RespondingEmployeeId ?? Guid.Empty : RespondingInstallationId;
     }
     internal static string Correlation(Guid commentId, long revision) => $"{commentId:D}:{revision}";
     internal static bool Mentions(string body, string name) => !string.IsNullOrWhiteSpace(name) &&
