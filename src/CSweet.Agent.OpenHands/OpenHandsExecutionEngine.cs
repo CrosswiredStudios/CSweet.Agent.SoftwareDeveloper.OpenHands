@@ -125,8 +125,7 @@ public sealed class OpenHandsExecutionEngine(OpenHandsEngineOptions? options = n
                     if (process.ExitCode != 0) throw new OperationalDevelopmentException("The OpenHands worker failed during finalization. Retained checkpoints were preserved.");
                     return new(data.GetProperty("text").GetString() ?? "");
                 }
-                else throw new OperationalDevelopmentException("openhands.runtime.failed: The OpenHands execution engine could not complete this turn. " +
-                    "Retained checkpoints were preserved. Review the runtime and selected model readiness before retrying.",bridge.Failure);
+                else throw new OperationalDevelopmentException(WorkerFailureDiagnostic(data), bridge.Failure);
             }
         }
         finally
@@ -134,6 +133,27 @@ public sealed class OpenHandsExecutionEngine(OpenHandsEngineOptions? options = n
             if (!process.HasExited) { process.Kill(entireProcessTree: true); await process.WaitForExitAsync(CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(10)); }
             await stderr.WaitAsync(TimeSpan.FromSeconds(10));
         }
+    }
+
+    internal static string WorkerFailureDiagnostic(JsonElement data)
+    {
+        var code = data.TryGetProperty("code", out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+        var phase = data.TryGetProperty("phase", out value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+        code = code switch
+        {
+            "APIError" or "APIConnectionError" or "AuthenticationError" or "PermissionDeniedError" or "BadRequestError" or
+            "RateLimitError" or "ValidationError" or "ValueError" or "TypeError" or "RuntimeError" or "KeyError" or
+            "AssertionError" or "ImportError" or "ModuleNotFoundError" or "ConnectionError" or "TimeoutError" or
+            "FileNotFoundError" or "OSError" => code,
+            _ => "WorkerError"
+        };
+        phase = phase switch
+        {
+            "startup" or "imports" or "model_setup" or "conversation_setup" or "execution" => phase,
+            _ => "unknown"
+        };
+        return $"openhands.runtime.failed: OpenHands stopped during {phase} ({code}). " +
+            "Retained checkpoints were preserved. Review C-Sweet's model diagnostics and runtime readiness before retrying.";
     }
 
     private static async Task<string> BootstrapAsync(string worker, string runtime, AgentRuntimeContext context, CancellationToken token)

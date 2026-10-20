@@ -11,6 +11,58 @@ namespace CSweet.Agent.SoftwareDeveloper.OpenHands.Tests;
 
 public sealed partial class ComputeDeploymentRecoveryTests
 {
+    [Fact]
+    public async Task Operational_worker_failure_does_not_consume_a_personal_plan_repair_attempt()
+    {
+        var f = new Fixture("Code");
+        var task = f.Item with { Id = Guid.NewGuid(), PlanRootId = f.Item.Id, Kind = "Task",
+            Title = "Research documentation", PlanExecution = "Implementation", Status = "Running" };
+        var payload = JsonNode.Parse(f.State.Payload.GetRawText())!;
+        payload["outcome"] = null; payload["publication"] = null; payload["bundleDigest"] = null;
+        payload["activePlanTaskId"] = JsonValue.Create(task.Id);
+        payload["workspace"]!["workItemId"] = JsonValue.Create(task.Id);
+        payload["planRepairAttempt"] = 0;
+        payload["planRequest"] = JsonSerializer.SerializeToNode(new CreatePersonalWorkPlanRequest(f.Item.Id, "MVP", [], "plan"));
+        f.State = f.State with { Payload = JsonSerializer.SerializeToElement(payload) };
+        var workspaceId = payload["workspace"]!["workspaceId"]!.GetValue<Guid>();
+        var root = PlatformGitWorkspaceClient.LocalWorkspacePath(workspaceId);
+        f.Runtime.RegisterCapability<CreatePersonalWorkPlanRequest, PersonalWorkPlan>(PersonalWorkPlanCapabilities.Create,
+            (_, _) => Task.FromResult(new PersonalWorkPlan(f.Item.Id, f.Item.Revision, [task])))
+            .RegisterCapability<GitWorkspaceSyncRequest, GitWorkspaceSyncResult>(PlatformGitWorkspaceClient.SyncCapability, (r, _) =>
+            {
+                Assert.Equal("pull", r.Direction);
+                using var stream = new MemoryStream();
+                using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
+                using (var writer = new StreamWriter(zip.CreateEntry("README.md").Open())) writer.Write("Retained source");
+                return Task.FromResult(new GitWorkspaceSyncResult(stream.ToArray()));
+            });
+        var engine = new UnavailableExecutionEngine();
+        var agent = new OpenHandsDeveloperAgent(new OutcomeFactory("{}"), engine);
+        try
+        {
+            await f.Runtime.ExecuteCapabilityAsync(agent, AgentConfigurationCapabilities.Update,
+                new { settings = new { llmProviderId = Guid.NewGuid(), llmModel = "test", maximumPlanRepairs = 2 } });
+            var result = await agent.HandlePersonalTodoAsync(f.Item, f.Runtime.CreateContext(), default);
+            Assert.Equal(1, engine.Calls);
+            Assert.Equal(0, f.State.Payload.GetProperty("planRepairAttempt").GetInt32());
+            Assert.Contains("openhands.runtime.failed", ResultContent(result));
+            Assert.DoesNotContain("Task validation failed", ResultContent(result));
+            Assert.DoesNotContain("repair budget", ResultContent(result));
+            Assert.Contains("openhands.runtime.failed", Assert.Single(f.Sent));
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    private sealed class UnavailableExecutionEngine : IDevelopmentExecutionEngine
+    {
+        internal int Calls;
+        public Task<DevelopmentExecutionResult> ExecuteAsync(DevelopmentExecutionRequest request, CancellationToken token)
+        {
+            Calls++;
+            throw new OperationalDevelopmentException("openhands.runtime.failed: OpenHands stopped during execution (BadRequestError).");
+        }
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

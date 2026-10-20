@@ -111,6 +111,7 @@ internal sealed partial class PersonalDevelopmentService
                 var outcomePath = Path.Combine(root, ".csweet", "outcome.json");
                 if (File.Exists(outcomePath)) File.Delete(outcomePath);
                 SoftwareDevelopmentOutcome outcome;
+                var engineCompleted = false;
                 await ProgressAsync("Writing application code, Docker configuration, and tests.");
                 await using var shell = DevelopmentExecution.CreateShell(root);
                 var progress = new WorkspaceProgress(item.Id, context.ReportProgressAsync, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance, workspacePath: root);
@@ -161,12 +162,14 @@ Include README instructions and test coverage for the requested behavior. The pl
 {{WorkspaceValidation.Guidance}}
 """, root, ct, token => context.Platform.Git.UploadAsync(workspace, 1, token), shell: shell);
 
+                    engineCompleted = true;
                     DevelopmentWorkspaceService.ValidateMetadataPath(root);
                     outcome = await ImplementationOutcomeReader.ReadAsync(root, ct);
                     // Personal plans already own a durable, configured repair budget.
                     outcome = await progress.Validations.VerifyAsync(outcome, shell, root, ct);
                 }
-                catch (Exception error) when ((error is InvalidOperationException or JsonException) && planTask is not null)
+                catch (Exception error) when ((error is InvalidOperationException or JsonException) &&
+                    (engineCompleted || !DevelopmentFailurePolicy.IsOperational(error)) && planTask is not null)
                 {
                     return await RetainAndRepairPlanTaskAsync(error.Message, error is ImplementationOutcomeException);
                 }

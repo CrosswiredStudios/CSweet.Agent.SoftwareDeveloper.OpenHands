@@ -6,10 +6,10 @@ software work while C-Sweet owns tickets, grants, approvals, source publication 
 ## Contract
 
 - Agent ID: `com.csweet.software-developer.openhands`
-- Version: `0.1.3`
+- Version: `0.1.4`
 - Provides: `software-development.implement.v1`
 - Activation: OnDemand; one concurrent job; requires an assigned project.
-- Packages: `CSweet.Agent.Development`, `CSweet.Agent.OpenHands`, and `CSweet.Agent.SoftwareDeveloper.OpenHands`, each 0.1.3.
+- Packages: `CSweet.Agent.Development`, `CSweet.Agent.OpenHands`, and `CSweet.Agent.SoftwareDeveloper.OpenHands`, each 0.1.4.
 - Runtime: existing certified Linux development guest, .NET 10 and Python 3.12. OpenHands SDK/tools are pinned to 1.56.0.
 - Requested capabilities cover the implemented work, communication, repository, compute, research and private checkpoint workflows in the reviewed manifest. Declarations are not grants.
 - Network: reviewed public runtime egress for dependency setup; public page reading follows the separately reviewed web policy.
@@ -42,6 +42,12 @@ Publish the SDK/platform prerequisites first. Import the versioned GitHub releas
 normal Installed Agents flow, review its source and grants, choose the provider/model, and assign
 it to a disposable pilot project. Runtime dependency setup is automatic; users do not install Python
 or configure a second model credential. Research uses C-Sweet's startup-managed SearXNG service.
+
+The worker leaves reasoning effort and reasoning summaries to C-Sweet's selected provider/model
+defaults. It passes the full configured context window to OpenHands and preserves the configured
+output budget. Worker or provider failures stop as operational blockers without consuming personal
+plan code-repair attempts. Diagnostics expose only known failure categories and worker phases;
+raw exception messages, credentials and model/tool payloads stay out of ticket activity.
 
 Release assets include independently packaged `.nupkg` files and the verified Linux `.csab`.
 Shared-package consumers can use the downloaded packages as a local feed. Never patch approved

@@ -18,6 +18,7 @@ MAXIMUM_FRAME = 2 * 1024 * 1024
 _output = sys.stdout
 sys.stdout = sys.stderr
 _gate = threading.RLock()
+_phase = "startup"
 
 from openhands.sdk.tool import Observation
 
@@ -43,6 +44,7 @@ def rpc(kind: str, **payload):
 
 
 def main():
+    global _phase
     raw = sys.stdin.readline(MAXIMUM_FRAME + 1)
     if not raw or len(raw) > MAXIMUM_FRAME:
         raise RuntimeError("Missing or oversized worker request")
@@ -53,6 +55,7 @@ def main():
     if any(importlib.metadata.version(package) != "1.56.0" for package in ("openhands-sdk", "openhands-tools")):
         raise RuntimeError("Incompatible OpenHands runtime")
 
+    _phase = "imports"
     from pydantic import SecretStr
     from openhands.sdk import LLM, Agent, Conversation
     from openhands.sdk.context import AgentContext
@@ -134,9 +137,11 @@ def main():
     register_tool("csweet_terminal", CSweetTerminalTool)
     register_tool("csweet_file_editor", CSweetFileEditorTool)
     specs += [Tool(name="csweet_terminal"), Tool(name="csweet_file_editor"), Tool(name=TaskTrackerTool.name)]
+    _phase = "model_setup"
     llm = LLM(model="openai/csweet-broker", base_url=request["baseUrl"], api_key=SecretStr(request["bridgeToken"]),
-              usage_id="development", max_input_tokens=request["contextTokens"] - request["outputTokens"],
+              usage_id="development", max_input_tokens=request["contextTokens"],
               max_output_tokens=request["outputTokens"], num_retries=0, log_completions=False,
+              reasoning_effort=None, reasoning_summary=None,
               timeout=None, stream_idle_timeout=None,
               api_mode="chat", disable_vision=True, caching_prompt=False,
               capability_overrides={"supports_vision": False, "supports_prompt_cache": False, "supports_responses_api": False})
@@ -179,6 +184,7 @@ def main():
     had_state = (persistence / conversation_id.hex).exists()
     if had_state and state_snapshot.exists():
         (persistence / conversation_id.hex / BASE_STATE).write_text(state_snapshot.read_text(encoding="utf-8"), encoding="utf-8")
+    _phase = "conversation_setup"
     conversation = Conversation(agent=agent, workspace=str(scratch), persistence_dir=str(persistence),
                                 conversation_id=conversation_id, callbacks=[checkpoint],
                                 max_iteration_per_run=request["maximumIterations"], visualizer=None,
@@ -188,6 +194,7 @@ def main():
         conversation.reject_pending_actions("Interrupted action: do not replay it. Reinspect current source and reconcile external effects through C-Sweet receipts.")
     receipt_path.write_text(json.dumps({"turn": turn, "completed": False}), encoding="utf-8")
     conversation.send_message(request["prompt"])
+    _phase = "execution"
     conversation.run()
     if not final["text"].strip():
         raise RuntimeError("OpenHands ended without a final implementation report")
@@ -207,6 +214,6 @@ if __name__ == "__main__":
         if "--diagnostics" in sys.argv:
             import traceback
             traceback.print_exc(file=sys.stderr)
-        _output.write(json.dumps({"protocol": PROTOCOL, "kind": "failed", "code": type(error).__name__}) + "\n")
+        _output.write(json.dumps({"protocol": PROTOCOL, "kind": "failed", "code": type(error).__name__, "phase": _phase}) + "\n")
         _output.flush()
         sys.exit(1)

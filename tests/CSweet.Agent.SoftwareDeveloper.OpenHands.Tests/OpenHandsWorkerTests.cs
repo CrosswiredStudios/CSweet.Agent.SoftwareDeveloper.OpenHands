@@ -9,8 +9,10 @@ namespace CSweet.Agent.SoftwareDeveloper.OpenHands.Tests;
 
 public sealed class OpenHandsWorkerTests
 {
-    [Fact]
-    public async Task RealPinnedWorkerEditsCallsTypedToolsCheckpointsAndRestoresWithoutRepeatingModelWork()
+    [Theory]
+    [InlineData(32000, 4000)]
+    [InlineData(256000, 128000)]
+    public async Task RealPinnedWorkerEditsCallsTypedToolsCheckpointsAndRestoresWithoutRepeatingModelWork(int contextTokens, int outputTokens)
     {
         var python = Environment.GetEnvironmentVariable("CSWEET_TEST_OPENHANDS_PYTHON");
         if (string.IsNullOrWhiteSpace(python))
@@ -36,6 +38,7 @@ public sealed class OpenHandsWorkerTests
             });
         using var client = new ModelBridgeTests.ScriptedClient((messages, opts) =>
         {
+            Assert.Null(opts!.Reasoning); // Leave provider/model defaults under C-Sweet's control.
             Assert.Contains(opts!.Tools!, x => x.Name == "file_editor");
             var call = ++count switch
             {
@@ -55,7 +58,7 @@ public sealed class OpenHandsWorkerTests
         {
             Assert.Equal("focused-test",command); commands++; return "Exit code: 0. Focused tests passed.";
         },"execute_workspace_command")] };
-        var request = new DevelopmentExecutionRequest("worker-test","Implement, test and research.",source,runtime.CreateContext(),client,options,12,32000,4000);
+        var request = new DevelopmentExecutionRequest("worker-test","Implement, test and research.",source,runtime.CreateContext(),client,options,12,contextTokens,outputTokens);
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
         try
         {
