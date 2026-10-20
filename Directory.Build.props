@@ -1,0 +1,14 @@
+<Project>
+ <PropertyGroup>
+  <TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><LangVersion>latest</LangVersion>
+  <Authors>C-Sweet</Authors><PackageLicenseExpression>MIT</PackageLicenseExpression>
+  <PackageReadmeFile>README.md</PackageReadmeFile>
+  <RepositoryUrl>https://github.com/CrosswiredStudios/CSweet.Agent.SoftwareDeveloper.OpenHands</RepositoryUrl>
+  <Deterministic>true</Deterministic><ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+ </PropertyGroup>
+ <ItemGroup>
+  <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
+  <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="/" CopyToPublishDirectory="PreserveNewest" Link="THIRD-PARTY-NOTICES.md" />
+  <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="/" CopyToPublishDirectory="PreserveNewest" Link="LICENSE" />
+ </ItemGroup>
+</Project>

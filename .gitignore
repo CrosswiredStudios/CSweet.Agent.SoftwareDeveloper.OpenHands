@@ -328,6 +328,7 @@ paket-files/
 
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
+.test-runtime/
 *.pyc
 
 # Cake - Uncomment if you are using it
@@ -399,3 +400,9 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Published agent release notes
+!releases/
+!releases/*.md
+.venv/
+__pycache__/

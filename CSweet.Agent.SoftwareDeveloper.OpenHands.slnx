@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/CSweet.Agent.Development/CSweet.Agent.Development.csproj" />
+  <Project Path="src/CSweet.Agent.OpenHands/CSweet.Agent.OpenHands.csproj" />
+  <Project Path="src/CSweet.Agent.SoftwareDeveloper.OpenHands/CSweet.Agent.SoftwareDeveloper.OpenHands.csproj" />
+  <Project Path="tests/CSweet.Agent.SoftwareDeveloper.OpenHands.Tests/CSweet.Agent.SoftwareDeveloper.OpenHands.Tests.csproj" />
+</Solution>

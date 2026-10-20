@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><Version>0.1.0</Version><Description>Engine-neutral C-Sweet developer workflows and SDK integration.</Description></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CSweet.Agent.SDK" Version="5.1.0" />
+    <PackageReference Include="Microsoft.Agents.AI.Tools.Shell" Version="1.15.0-preview.260722.1" />
+    <InternalsVisibleTo Include="CSweet.Agent.OpenHands" />
+    <InternalsVisibleTo Include="CSweet.Agent.SoftwareDeveloper.OpenHands.Tests" />
+  </ItemGroup>
+</Project>

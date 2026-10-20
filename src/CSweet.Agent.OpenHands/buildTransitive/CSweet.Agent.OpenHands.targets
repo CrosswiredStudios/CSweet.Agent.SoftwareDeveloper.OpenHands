@@ -1,0 +1,9 @@
+<Project>
+ <ItemGroup>
+  <!-- contentFiles do not propagate through a thin agent's transitive dependency. -->
+  <Content Remove="$(MSBuildThisFileDirectory)../contentFiles/any/net10.0/worker/**/*" />
+  <Content Include="$(MSBuildThisFileDirectory)../contentFiles/any/net10.0/worker/**/*"
+           Link="worker/%(RecursiveDir)%(Filename)%(Extension)"
+           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Pack="false" Visible="false" />
+ </ItemGroup>
+</Project>

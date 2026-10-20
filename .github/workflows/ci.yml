@@ -1,0 +1,54 @@
+name: verify-pilot
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CSWEET_TEST_OPENHANDS_PYTHON: ${{ github.workspace }}/.test-runtime/bin/python
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      LITELLM_LOCAL_MODEL_COST_MAP: 'True'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare hash-locked Python runtime
+        run: |
+          python -m venv .test-runtime
+          .test-runtime/bin/python -m pip install --require-hashes -r src/CSweet.Agent.OpenHands/worker/build-requirements.lock
+          .test-runtime/bin/python -m pip install --require-hashes --no-build-isolation -r src/CSweet.Agent.OpenHands/worker/requirements-linux.lock
+      - run: dotnet test CSweet.Agent.SoftwareDeveloper.OpenHands.slnx -c Release
+      - run: dotnet run --project src/CSweet.Agent.SoftwareDeveloper.OpenHands -c Release --no-build -- --self-test
+      - name: Pack independent packages
+        run: |
+          dotnet pack src/CSweet.Agent.Development -c Release --no-build -o artifacts/packages
+          dotnet pack src/CSweet.Agent.OpenHands -c Release --no-build -o artifacts/packages
+          dotnet pack src/CSweet.Agent.SoftwareDeveloper.OpenHands -c Release --no-build -o artifacts/packages
+          python scripts/verify-packages.py artifacts/packages
+          python scripts/verify-package-consumer.py artifacts/packages
+      - name: Publish and verify Linux bundle
+        run: |
+          dotnet publish src/CSweet.Agent.SoftwareDeveloper.OpenHands -c Release -r linux-x64 --self-contained false -o artifacts/linux-x64
+          version=$(python -c 'import json; print(json.load(open("csweet-plugin.json"))["version"])')
+          bundle="artifacts/CSweet.Agent.SoftwareDeveloper.OpenHands-${version}-linux-x64.csab"
+          python scripts/pack-csab.py pack --manifest csweet-plugin.json --publish-dir artifacts/linux-x64 --os linux --arch x64 --out "$bundle"
+          python scripts/pack-csab.py verify --bundle "$bundle" --os linux --arch x64
+          sha256sum artifacts/*.csab > artifacts/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-openhands-pilot
+          path: |
+            artifacts/packages/*.nupkg
+            artifacts/*.csab
+            artifacts/SHA256SUMS
+          if-no-files-found: error

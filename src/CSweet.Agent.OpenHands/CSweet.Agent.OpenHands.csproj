@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><Version>0.1.0</Version><Description>OpenHands execution engine for C-Sweet SDK developer workflows.</Description></PropertyGroup>
+ <ItemGroup>
+  <ProjectReference Include="../CSweet.Agent.Development/CSweet.Agent.Development.csproj" />
+  <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  <Content Include="worker/**/*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Pack="true" PackagePath="contentFiles/any/net10.0/worker" PackageCopyToOutput="true" />
+  <None Include="buildTransitive/CSweet.Agent.OpenHands.targets" Pack="true" PackagePath="buildTransitive/" />
+  <InternalsVisibleTo Include="CSweet.Agent.SoftwareDeveloper.OpenHands.Tests" />
+ </ItemGroup>
+</Project>
