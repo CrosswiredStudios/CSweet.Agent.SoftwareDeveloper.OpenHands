@@ -37,7 +37,7 @@ public sealed class OpenHandsExecutionEngine(OpenHandsEngineOptions? options = n
         if (retained is not null)
         {
             if (retained.WorkspaceId != request.WorkspaceId || retained.AssignmentRevision != request.AssignmentRevision)
-                throw new InvalidOperationException("The retained OpenHands source assignment changed.");
+                throw new OperationalDevelopmentException("The retained OpenHands source assignment changed. Review the current assignment before retrying.");
             Directory.Delete(directory, recursive: true);
             Directory.CreateDirectory(directory);
             RestorePrivateArchive(retained.EngineArchive, directory);
@@ -73,7 +73,7 @@ public sealed class OpenHandsExecutionEngine(OpenHandsEngineOptions? options = n
             while (true)
             {
                 var line = await ReadBoundedLineAsync(process.StandardOutput, cancellationToken)
-                    ?? throw new InvalidOperationException("The OpenHands worker ended before completing its protocol.");
+                    ?? throw new OperationalDevelopmentException("The OpenHands worker ended before completing its protocol. Review runtime readiness before retrying.");
                 using var message = JsonDocument.Parse(line);
                 var data = message.RootElement;
                 if (data.GetProperty("protocol").GetInt32() != 1) throw new InvalidDataException("Unsupported worker protocol.");
@@ -122,7 +122,7 @@ public sealed class OpenHandsExecutionEngine(OpenHandsEngineOptions? options = n
                 else if (kind == "completed")
                 {
                     await process.WaitForExitAsync(cancellationToken);
-                    if (process.ExitCode != 0) throw new InvalidOperationException("The OpenHands worker failed during finalization.");
+                    if (process.ExitCode != 0) throw new OperationalDevelopmentException("The OpenHands worker failed during finalization. Retained checkpoints were preserved.");
                     return new(data.GetProperty("text").GetString() ?? "");
                 }
                 else throw new OperationalDevelopmentException("openhands.runtime.failed: The OpenHands execution engine could not complete this turn. " +
@@ -165,7 +165,7 @@ public sealed class OpenHandsExecutionEngine(OpenHandsEngineOptions? options = n
         {
             await process.WaitForExitAsync(token).WaitAsync(TimeSpan.FromMinutes(5), token);
             await Task.WhenAll(stdout, stderr);
-            if (process.ExitCode != 0) throw new InvalidOperationException("OpenHands runtime setup failed. Confirm the approved public internet grant and runtime readiness.");
+            if (process.ExitCode != 0) throw new OperationalDevelopmentException("OpenHands runtime setup failed. Confirm the approved public internet grant and runtime readiness.");
         }
         finally { if (!process.HasExited) process.Kill(entireProcessTree: true); }
     }
@@ -188,7 +188,14 @@ public sealed class OpenHandsExecutionEngine(OpenHandsEngineOptions? options = n
         info.Environment["HOME"] = home ?? (OperatingSystem.IsLinux() ? "/run/csweet/workload/home" : Path.GetTempPath());
         if (OperatingSystem.IsWindows()) info.Environment["USERPROFILE"] = info.Environment["HOME"];
         info.Environment["PIP_CACHE_DIR"] = OperatingSystem.IsLinux() ? "/run/csweet/workload/cache/pip" : Path.GetTempPath();
-        return Process.Start(info) ?? throw new InvalidOperationException("The OpenHands worker could not start.");
+        try
+        {
+            return Process.Start(info) ?? throw new OperationalDevelopmentException("The OpenHands worker could not start.");
+        }
+        catch (System.ComponentModel.Win32Exception error)
+        {
+            throw new OperationalDevelopmentException("The OpenHands runtime executable could not start. Confirm Python 3.12 and certified runtime readiness.", error);
+        }
     }
 
     private static async Task SendAsync(Process process, object data, CancellationToken token)

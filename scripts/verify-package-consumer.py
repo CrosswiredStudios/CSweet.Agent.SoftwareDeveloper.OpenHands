@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 root=Path(__file__).resolve().parent.parent
 version=json.loads((root/'csweet-plugin.json').read_text())['version']
@@ -21,5 +22,10 @@ foreach(var name in new[]{"worker/worker.py","worker/requirements-linux.lock","w
     if(!File.Exists(Path.Combine(AppContext.BaseDirectory,name))) throw new InvalidOperationException("Missing packaged runtime asset: "+name);
 Console.WriteLine("Independent package consumer loaded "+agent.AgentId+" "+agent.Version);
 ''',encoding='utf-8')
-    subprocess.run(['dotnet','restore',str(project),'--source',str(feed),'--source','https://api.nuget.org/v3/index.json'],check=True)
+    config=project.parent/'NuGet.Config'
+    config.write_text(f'''<configuration><packageSources><clear />
+<add key="pilot" value="{escape(str(feed), {'"': '&quot;'})}" />
+<add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+</packageSources></configuration>''',encoding='utf-8')
+    subprocess.run(['dotnet','restore',str(project),'--configfile',str(config)],check=True)
     subprocess.run(['dotnet','run','--project',str(project),'-c','Release','--no-restore'],check=True)

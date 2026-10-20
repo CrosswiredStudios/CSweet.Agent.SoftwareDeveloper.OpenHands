@@ -4,7 +4,7 @@ namespace CSweet.Agent.SoftwareDeveloper.OpenHands;
 public static class OpenHandsDeveloperProfile
 {
     public const string AgentId = "com.csweet.software-developer.openhands";
-    public const string Version = "0.1.1";
+    public const string Version = "0.1.2";
     public const string DisplayName = "OpenHands Developer";
     public const string PrimaryCapability = "software-development.implement.v1";
     public const string LlmCapability = "platform.llm.chat-stream.v1";

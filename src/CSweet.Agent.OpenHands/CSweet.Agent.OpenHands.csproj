@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
- <PropertyGroup><Version>0.1.1</Version><Description>OpenHands execution engine for C-Sweet SDK developer workflows.</Description></PropertyGroup>
+ <PropertyGroup><Version>0.1.2</Version><Description>OpenHands execution engine for C-Sweet SDK developer workflows.</Description></PropertyGroup>
  <ItemGroup>
   <ProjectReference Include="../CSweet.Agent.Development/CSweet.Agent.Development.csproj" />
   <FrameworkReference Include="Microsoft.AspNetCore.App" />
