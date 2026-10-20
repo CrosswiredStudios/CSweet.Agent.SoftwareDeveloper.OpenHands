@@ -84,3 +84,19 @@ passed, including 91 protocol/schema/research/checkpoint cases and six approved-
 cases; its CI restore is independently blocked by the baseline pin to unpublished
 `CSweet.Memory.Broker` 0.5.1 (NuGet currently supplies 0.5.0). Local verification packed the unchanged
 0.5.1 source without publishing or modifying it.
+
+## Compute preparation recovery (2026-10-20)
+
+The owner approved the initial Windows elevation prompt. Linux image preparation completed,
+including Ubuntu installation and reusable-image finalization. Setup then stopped at
+`compute_checks_failed`: `ComputeResultDispatcherTests.Cursor_passes_a_full_page_of_expired_results_to_deliver_fresh_evidence`
+encountered Windows access denied while atomically replacing its temporary replay journal.
+All 625 existing compute tests passed on rerun, consistent with an intermittent file-access failure.
+
+Platform commit `d842db79` adds bounded retries for Windows rename access/sharing failures while
+retaining the journal lock, rechecking protected paths and preserving the previous journal.
+It never retries a physical effect. Persistent lock and cancellation still fail closed. All
+628 compute tests passed from the clean isolated checkout, including three new lock scenarios.
+The normal Compute UI retry was started; it requires another owner-approved Windows elevation
+prompt. The completed image can be reused. Compute readiness and live source execution remain
+unverified until that installer completes.
