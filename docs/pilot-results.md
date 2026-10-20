@@ -101,3 +101,45 @@ The normal Compute UI retry reused the completed image and finished at 08:39:50 
 Its own installer acceptance report passed all 628 tests, and the business-scoped compute service
 is Running. The Compute page showed Ready and automatically requested separate 2-CPU/2-GiB
 instances for OpenHands and Daniel. Live source execution remains unverified.
+
+## First live planning attempts after compute readiness
+
+Both queued requests were claimed automatically after their separate compute instances became
+ready. Daniel's first attempt stopped safely during planning after three invalid-JSON responses
+(the final parser diagnostic reported an unclosed object/array). No Daniel source or package was
+changed. OpenHands completed a 26-ticket personal plan, then stopped at the first child's source
+workspace preparation with an authorization denial. It had not executed the OpenHands coding
+worker or published source at this point.
+
+Both retained intake descriptions still narrowed combining marks to U+0300–U+036F. Matching owner
+clarifications were posted on the actual execution tickets, requiring all Unicode Mark characters
+and an additional U+1AB0 test. OpenHands task descriptions subsequently included that correction,
+although one earlier story outline retained the older range. This intake inconsistency is a live
+limitation, not a completed correctness check.
+
+Platform commit `c5b2cc6d` routes project personal-plan children using their server-written
+`PersonalPlan` metadata through the existing personal-assignment checks. Children use the live claim on their coordinator; their retained chat references alone do not identify that lease. The previous router
+mistook them for orchestration tasks. All 33 related Git/planning tests passed; regressions cover
+personal and project boards, distinct branches, current child/coordinator assignment, expired
+claims, revoked grants and disabled installations. The isolated AgentHost build was applied through
+an Aspire-controlled stop/restart with the prior assembly retained. Normal workboard Retry actions
+returned the child and coordinator to Ready. No grants, approved payloads or package records were
+patched.
+
+The OpenHands plan acknowledges the no-deployment conflict but includes a final task named
+`[BLOCKED-PENDING-RESOLUTION] Deployment per planning contract`. Its name is not proof of a platform
+block or approval. No deployment has run, and this scenario remains unaccepted pending verification
+that the adapter stops for an authorized manager decision before expanding the requested scope.
+
+The first normal child retry changed its board position. The adapter then selected a later task by
+board rank, and C-Sweet correctly rejected skipping unfinished dependencies. Platform commit
+`91aa0b6c` makes plan response ranks reflect server-written `PersonalPlan.Order` while preserving
+board ranks. All 112 related personal-work service, planning and Git tests passed, including a
+reordered-first-task regression and continued rejection of skipping it. The isolated planning
+service and AgentHost assemblies were applied through another controlled Aspire restart; the
+OpenHands coordinator was retried normally again. These platform restarts are pilot interventions,
+not evidence of successful OpenHands conversation restoration.
+
+Daniel's normal planning retry created a plan, then stopped at workspace synchronization after the
+platform restart with a current-claim authorization denial. Source delivery remains incomplete for
+both agents. No completion-rate or performance advantage is claimed.
