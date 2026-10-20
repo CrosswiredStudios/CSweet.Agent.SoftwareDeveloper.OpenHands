@@ -22,6 +22,7 @@ internal static partial class DevelopmentExecution
             ["CI"] = "true"
         };
         var timeout = commandTimeout ?? BoundedWorkspaceShell.CommandTimeout;
+        var policy = CreateShellPolicy();
         return new BoundedWorkspaceShell(new LocalShellExecutor(new LocalShellExecutorOptions
         {
             // Confined commands already re-anchor at the workspace. Do not share shell
@@ -34,8 +35,8 @@ internal static partial class DevelopmentExecution
             Timeout = timeout,
             MaxOutputBytes = 32 * 1024,
             AcknowledgeUnsafe = true,
-            Policy = CreateShellPolicy()
-        }), timeout);
+            Policy = policy
+        }), timeout, policy: policy, workingDirectory: workspacePath);
     }
 
     internal static ShellPolicy CreateShellPolicy() => new ShellPolicy(

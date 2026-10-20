@@ -19,6 +19,10 @@ has been made.
   regression tests. The independent package consumer and agent self-test passed. The normal targeted
   Installed Agents update then installed 0.1.2 on attempt one, with download, digest verification and
   immutable package sealing all complete (2026-10-20 01:05 America/Los_Angeles).
+- The shared adapter now also carries the subsequently published Daniel 2.1.2 shell-policy recovery
+  behavior. Four additional tests cover denied-command feedback, absent validation receipts, bounded
+  escalation, source preservation and permitted continuation, including actual pinned worker execution.
+  This closes a workflow difference before any harness performance comparison.
 - OpenHands Developer 0.1.1 was hired through the normal catalog review with Local vLLM qwen3.8-27b,
   256,000 context tokens and 128,000 maximum output tokens. Its reviewed public internet grant is Allowed.
 
@@ -32,6 +36,7 @@ has been made.
 - Informational initiative: `PD8784BF648-1`; no execution authority was inferred from its creation.
 - Direct-work personal ticket prefix: `7B3755E2`; visible Ready and unclaimed while compute waits.
 - Baseline project: `743d0b9a-81ce-45ee-be99-e48c4ada54ce` (Slug Utility — Daniel Baseline).
+- Baseline direct intake: `636cda27-c0a3-48a4-b41c-e7a6d70e05e6` (Implement normalizeSlug module with tests).
 - Published Daniel 2.1.2, commit `38eb2d1ca426328931f950e287cf0d4acdd5cb50`, installed normally for
   a separate baseline employee with matching model/token/repair settings. Daniel and Adrian source,
   versions, historical releases and existing installations were not modified.
