@@ -44,11 +44,14 @@ jobs:
           python scripts/pack-csab.py pack --manifest csweet-plugin.json --publish-dir artifacts/linux-x64 --os linux --arch x64 --out "$bundle"
           python scripts/pack-csab.py verify --bundle "$bundle" --os linux --arch x64
           sha256sum artifacts/*.csab > artifacts/SHA256SUMS
+          sha256sum "$bundle" > "$bundle.sha256"
+          sha256sum --check "$bundle.sha256"
       - uses: actions/upload-artifact@v4
         with:
           name: verified-openhands-pilot
           path: |
             artifacts/packages/*.nupkg
             artifacts/*.csab
+            artifacts/*.csab.sha256
             artifacts/SHA256SUMS
           if-no-files-found: error
