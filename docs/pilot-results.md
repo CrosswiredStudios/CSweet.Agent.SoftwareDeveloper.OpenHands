@@ -97,6 +97,7 @@ Platform commit `d842db79` adds bounded retries for Windows rename access/sharin
 retaining the journal lock, rechecking protected paths and preserving the previous journal.
 It never retries a physical effect. Persistent lock and cancellation still fail closed. All
 628 compute tests passed from the clean isolated checkout, including three new lock scenarios.
-The normal Compute UI retry was started; it requires another owner-approved Windows elevation
-prompt. The completed image can be reused. Compute readiness and live source execution remain
-unverified until that installer completes.
+The normal Compute UI retry reused the completed image and finished at 08:39:50 America/Los_Angeles.
+Its own installer acceptance report passed all 628 tests, and the business-scoped compute service
+is Running. The Compute page showed Ready and automatically requested separate 2-CPU/2-GiB
+instances for OpenHands and Daniel. Live source execution remains unverified.
