@@ -143,3 +143,54 @@ not evidence of successful OpenHands conversation restoration.
 Daniel's normal planning retry created a plan, then stopped at workspace synchronization after the
 platform restart with a current-claim authorization denial. Source delivery remains incomplete for
 both agents. No completion-rate or performance advantage is claimed.
+
+## OpenHands 0.1.4 provider compatibility release
+
+The first actual worker calls reached the governed endpoint but the local vLLM Qwen template
+rejected OpenHands' unsolicited `high` reasoning effort. The server explicitly supports `xhigh`,
+`medium` and `low`; ordinary C-Sweet planning calls used the provider default successfully. Version
+0.1.4 leaves reasoning effort/summary at the C-Sweet provider default and maps the configured full
+context window to OpenHands. Model selection and output budgets are unchanged.
+
+The personal-plan repair handler had also counted the worker's operational exception as a code
+validation failure. Version 0.1.4 preserves operational classification at the engine boundary and
+keeps actual validation/outcome repairs bounded. Worker failures report only known phase/category
+labels, without raw exception messages or model/tool payloads. The previous 0.1.3 attempt consumed
+its repair budget incorrectly; this is recorded as a pilot defect, not a code-test failure.
+
+All 244 tests passed locally and in the Linux/Python 3.12 release job, including actual worker
+execution with both 32,000/4,000 and 256,000/128,000 context/output settings, provider-default
+reasoning, persistence/restoration, diagnostic sanitization and operational repair-budget handling.
+All three 0.1.4 package dependencies were verified, with a source-independent consumer and
+entrypoint self-test. Release workflow `39456326147` succeeded and published the three packages,
+Linux bundle, exact bundle checksum sidecar and SHA256SUMS.
+
+Normal targeted Installed Agents update installed prebuilt 0.1.4 on attempt one at 09:23
+America/Los_Angeles. Download, digest verification and immutable sealing completed. The installed
+commit is `e3ceaf17aed139e2c8bd6a8f1d5db4c6ff386681`. Authoritative model diagnostics now show
+successful calls attributed to 0.1.4 for the resumed research task. Source publication and review
+are still being evaluated; these model calls alone are not task completion evidence.
+
+## Live project lease recovery and first OpenHands candidate
+
+OpenHands 0.1.4 reached real file edits and `node:test` repair, then its source checkpoint was
+correctly denied when the project coordinator claim expired after five minutes. Runtime work
+leases were renewing, but `AgentWorkInbox.RenewPersonalTaskClaimAsync` only selected personal
+boards. Platform commit `2864fb84` extends renewal to the exact live project claim or authenticated
+server-bound callback, checks current installation/employee/project/team/grants, preserves ticket
+revisions and caps expiry at the work deadline. All 175 focused platform regressions passed,
+including 20 project claim cases covering reassignment, expiry, cancellation, disabled installation,
+revoked grants, removed membership, manager waits, wrong context/binding and deadlines.
+
+The tested isolated AgentHost/Infrastructure assemblies were applied through an Aspire-controlled
+stop/restart with backups. The child and coordinator were retried through the normal workboard.
+This is another recorded operator/platform intervention, not an autonomous agent recovery success.
+The renewed live claim was observed at 16:47 and 16:48 UTC; successful governed model calls resumed.
+
+At 16:48:53 UTC, OpenHands published candidate `46c1fbc589c328f61350909860b42c5cc2bdca37`
+for research task `7ed7f7a7-4433-3986-c11c-2c3ba5cbbe90`. Review
+`1c311162-db1f-e0e2-85b3-53fc2ca45540` is AwaitingApproval with no QA agent assigned.
+Publication alone is not acceptance; independent inspection is in progress. Daniel's workspace
+preparation candidate `3a3e5e94148d2ec6fda31c6ce77a9b068c58ee6b` is also AwaitingApproval
+(review `bee2da1a-3a6b-1c3d-c274-a64d40fcee3c`). Neither complete module has been accepted,
+and no deployment has run. Completion-rate and performance comparisons remain pending.
