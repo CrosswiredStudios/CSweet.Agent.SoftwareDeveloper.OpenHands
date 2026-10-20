@@ -16,7 +16,9 @@ has been made.
   on attempt one. No approved package records, artifact digests or installed payloads were patched.
 - Maintenance release 0.1.2 published all three packages and the verified Linux bundle with its exact
   checksum sidecar. All 234 agent tests passed locally and in CI, including operational startup/exit
-  regression tests. The independent package consumer and agent self-test passed.
+  regression tests. The independent package consumer and agent self-test passed. The normal targeted
+  Installed Agents update then installed 0.1.2 on attempt one, with download, digest verification and
+  immutable package sealing all complete (2026-10-20 01:05 America/Los_Angeles).
 - OpenHands Developer 0.1.1 was hired through the normal catalog review with Local vLLM qwen3.8-27b,
   256,000 context tokens and 128,000 maximum output tokens. Its reviewed public internet grant is Allowed.
 
