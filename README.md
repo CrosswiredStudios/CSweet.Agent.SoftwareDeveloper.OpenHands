@@ -6,7 +6,7 @@ software work while C-Sweet owns tickets, grants, approvals, source publication 
 ## Contract
 
 - Agent ID: `com.csweet.software-developer.openhands`
-- Version: `0.1.7`
+- Version: `0.1.8`
 - Provides: `software-development.implement.v1`
 - Activation: OnDemand; one concurrent job; requires an assigned project.
 - Packages: `CSweet.Agent.Development`, `CSweet.Agent.OpenHands`, and `CSweet.Agent.SoftwareDeveloper.OpenHands`, each 0.1.7.
@@ -83,3 +83,13 @@ function-invocation loop for simple agents. Preserve all existing execution and 
 ## Shared delegation
 
 SDK 5.1.0 supplies typed delegation and work tracking with shared dispatch, durable reporting receipts, current access checks and bounded wake recovery. Follow the SDK docs/delegation-with-tracking.md guide. Delegation does not grant execution authority; memory does not own outstanding obligations.
+
+## CI dependency fallback
+
+GitHub Actions uses the pinned SDK and WorkManagement.Contracts versions from NuGet when available.
+An unpublished version is packed from its reviewed full commit in `build/ci-dependencies.json`.
+Update that commit pin together with any SDK or contracts dependency bump; CI rejects mismatched versions.
+Packages stay local to the job and are never pushed to NuGet. The job summary and dependency-provenance
+artifact record origins, source commits and SHA-256 hashes. Private source repositories require the optional
+`CSWEET_DEPENDENCY_READ_TOKEN` Actions secret with read access to the dependency repositories.
+Run `python3 scripts/test-ci-dependencies.py` for the offline resolver regression tests.

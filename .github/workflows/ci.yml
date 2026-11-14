@@ -4,6 +4,9 @@ on:
     branches: [main, 'codex/**']
   pull_request:
   workflow_call:
+    secrets:
+      CSWEET_DEPENDENCY_READ_TOKEN:
+        required: false
 permissions:
   contents: read
 jobs:
@@ -19,6 +22,14 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - name: Verify CI dependency fallback
+        env:
+          CSWEET_RUN_DEPENDENCY_INTEGRATION: '1'
+        run: python3 scripts/test-ci-dependencies.py
+      - name: Prepare pinned C-Sweet dependencies
+        env:
+          CSWEET_DEPENDENCY_TOKEN: ${{ secrets.CSWEET_DEPENDENCY_READ_TOKEN }}
+        run: python3 scripts/prepare-ci-dependencies.py
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -55,3 +66,10 @@ jobs:
             artifacts/*.csab.sha256
             artifacts/SHA256SUMS
           if-no-files-found: error
+      - name: Upload dependency provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.job }}-ci-dependencies
+          path: .artifacts/ci-dependencies/resolved.json
+          if-no-files-found: ignore

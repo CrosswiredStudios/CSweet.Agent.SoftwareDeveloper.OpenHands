@@ -11,6 +11,7 @@ concurrency:
 jobs:
   verify:
     uses: ./.github/workflows/ci.yml
+    secrets: inherit
   release:
     needs: verify
     runs-on: ubuntu-latest

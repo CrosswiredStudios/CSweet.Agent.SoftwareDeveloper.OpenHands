@@ -406,3 +406,6 @@ FodyWeavers.xsd
 !releases/*.md
 .venv/
 __pycache__/
+
+# Temporary CI dependency feeds, validation outputs and Python bytecode.
+/.artifacts/
